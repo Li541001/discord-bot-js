@@ -1,12 +1,17 @@
-import { Client,Events,GatewayIntentBits } from "discord.js";
+import { Client, Events, GatewayIntentBits } from "discord.js";
 import dotenv from 'dotenv'
+import { botGlobalData } from "./store/data.js";
+import {loadCommands,loadEvents} from './core/loader.js'
 
 dotenv.config()
 
-const bot = new Client({intents:[GatewayIntentBits.Guilds]})
+const bot = new Client({ intents: [GatewayIntentBits.Guilds] })
+botGlobalData.bot = bot
+loadEvents()
+loadCommands()
 
-bot.once(Events.ClientReady,c =>{
-    console.log("----------------------bot online------------------------")
-})
 
 bot.login(process.env.TOKEN);
+
+
+
