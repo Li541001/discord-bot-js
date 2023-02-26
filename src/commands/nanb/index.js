@@ -1,4 +1,4 @@
-import { Options, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { playNanb, response } from "./nanb.js";
 
 
