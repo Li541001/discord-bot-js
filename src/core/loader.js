@@ -1,8 +1,9 @@
 import { REST, Routes, Collection } from "discord.js"
 import fg from 'fast-glob'
-import {botGlobalData}from '../store/data.js'
+import { botGlobalData } from '../store/data.js'
 
 
+//將指令使用api註冊到網路上
 const updateSlashCommands = async (commands) => {
     const rest = new REST({ version: 10 }).setToken(process.env.TOKEN)
     const result = await rest.put(
@@ -13,13 +14,11 @@ const updateSlashCommands = async (commands) => {
             body: commands
         }
     )
-
 }
 
-
-
-export const loadCommands = async () => {  
-    const files = await fg('./src/commands/**/index.js') 
+//將commands 的name與action fuc對應並存入store和註冊到網路上
+export const loadCommands = async () => {
+    const files = await fg('./src/commands/**/index.js')
     const commands = []
     const actions = new Collection()
 
@@ -31,9 +30,10 @@ export const loadCommands = async () => {
     }
     await updateSlashCommands(commands)
     botGlobalData.actions = actions
+    console.log(actions)
 }
 
-
+//將events 全部取出並且註冊
 export const loadEvents = async () => {
     const files = await fg('./src/events/**/index.js')
     for (const file of files) {
