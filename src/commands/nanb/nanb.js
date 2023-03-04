@@ -71,7 +71,7 @@ class Nanb {
     if (this.data.start != this.start) {
       this.setStart();
     } else {
-      return "已經開始";
+      return "warning: 已經開始";
     }
   };
 
@@ -82,7 +82,7 @@ class Nanb {
       this.setAns();
     } else {
       this.setAns(true);
-      return "還沒開始";
+      return "warning: 還沒開始";
     }
   };
 
@@ -93,13 +93,26 @@ class Nanb {
         this.setNum();
         this.compare();
       } else {
-        return "未設定答案";
+        return "warning: 未設定答案";
       }
     } else {
       this.setNum(true);
-      return "還沒開始";
+      return "warning: 還沒開始";
     }
   };
+
+  handleStatus=()=>{
+    let startStatus,ansStatus,resultStatus
+    this.start? startStatus = "開始":startStatus = "結束"
+    if(this.ans != null){
+      ansStatus = "已設定"
+    }
+    else{
+      ansStatus = "未設定"
+    }
+    resultStatus = `遊戲狀態:\n    遊戲開始: ${startStatus}\n    答案設定: ${ansStatus}\n    答題次數: ${this.data.num.length}`
+    return resultStatus
+  }
 
   compare = () => {
     let a = 0;
@@ -145,12 +158,16 @@ class Nanb {
   };
 }
 
-const stringToBool = (start) => {
+const stringToInt = (start) => {
   if (start == "start") {
-    start = true;
+    start = 1;
   } else if (start == "restart") {
-    start = false;
-  } else {
+    start = 2;
+  }
+  else if(start == "status"){
+    start = 3;
+  }
+  else {
     start = null;
   }
   return start;
@@ -158,10 +175,14 @@ const stringToBool = (start) => {
 
 export const playNanb = async (start, answer, guessnum, user) => {
   const data = await getApiData();
-  const startBool = stringToBool(start);
+  const startBool = stringToInt(start);
   const playGame = new Nanb(startBool, answer, guessnum, data, user);
+  let gameStatus
   let error = null;
-  if (startBool == false) {
+  if(startBool == 3){
+    gameStatus = playGame.handleStatus()
+  }
+  if (startBool == 2) {
     playGame.clear();
   } else if (startBool != null) {
     error = playGame.handleStart();
@@ -173,7 +194,7 @@ export const playNanb = async (start, answer, guessnum, user) => {
     error = playGame.handleGuess();
   }
   await playGame.setting();
-  return { error: error, result: playGame.result };
+  return { error: error, result: playGame.result,gameStatus:gameStatus };
 };
 
 export const response = (playResult, startbool, number) => {
@@ -182,9 +203,11 @@ export const response = (playResult, startbool, number) => {
   if (content == "" && playResult.error == null) {
     if (startbool != null) {
       if (startbool == "start") {
-        printText = `開始囉~~\n`;
+        printText = `遊戲開始~~\n`;
       } else if (startbool == "restart") {
-        printText = `結束遊戲\n`;
+        printText = `結束遊戲~~\n`;
+      } else if(startbool == "status"){
+        printText = playResult.gameStatus
       }
     }
     if (number != null) {

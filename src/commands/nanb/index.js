@@ -5,31 +5,33 @@ export const command = new SlashCommandBuilder()
   .setName("1a2b")
   .setDescription("小遊戲 1a2b")
 
-  .addIntegerOption((option) =>
+  .addStringOption((option) =>
     option
       .setName("number")
       .setDescription("請輸入答案(限定四位數數字不重複)")
-      .setMaxValue(9999)
+      .setMaxLength(4)
+      .setMinLength(4)
   )
   .addStringOption((option) =>
     option
-      .setName("start")
-      .setDescription("選擇是否開始遊戲")
+      .setName("status")
+      .setDescription("設定或查看遊戲狀態")
       .addChoices(
         { name: "start", value: "start" },
-        { name: "restart", value: "restart" }
+        { name: "restart", value: "restart" },
+        { name:"status",value: "status"}
       )
   )
-  .addIntegerOption((option) =>
-    option.setName("guess").setDescription("請輸入你的答案").setMaxValue(9999)
+  .addStringOption((option) =>
+    option.setName("guess").setDescription("請輸入你的答案").setMaxLength(4).setMinLength(4)
   );
 
 export const action = async (ctx) => {
   await ctx.reply("指令運行中......");
   const user = ctx.user.username;
-  const number = ctx.options.getInteger("number");
-  const guessnum = ctx.options.getInteger("guess");
-  const startbool = ctx.options.getString("start");
+  const number = ctx.options.getString("number");
+  const guessnum = ctx.options.getString("guess");
+  const startbool = ctx.options.getString("status");
   const playResult = await playNanb(startbool, number, guessnum, user);
   const text = response(playResult, startbool, number);
   await ctx.editReply(text);
