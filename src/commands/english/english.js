@@ -1,36 +1,33 @@
 import { getApiData,setApiData } from "./fetch.js"
 
 class Database{
-  construct (userId){
-    this.userId = userId                       //string
-    this.originData = this.apiData()           //api object
-    this.data = this.englishData()             //english object
-    this.contrastData = this.contrastData()    //bool
+  constructor (userId){
+    this.userId = userId       //string
+    this.originData = {}     //api object 
+    this.data =  {}       //english object
+    this.isHaveData = false  //bool
+  }
+  async initData(){
+    await this.apiData()
+    this.contrastData()
   }
   async apiData (){
     const datas = await getApiData()
-    return datas
-  }
-  englishData(){
-    const datas = this.originData.english
-    return datas
+    const englishData = datas.english
+    this.originData = datas
+    this.data = englishData
   }
   contrastData(){
-    const sameId = false
+    let sameId = false
     const keys = Object.keys(this.data)
     keys.forEach((item,index)=>{
       if(item == this.userId){
         sameId = true
       }
     })
-    return sameId
+    this.isHaveData = sameId
   }
-  getData(){
-    return this.data
-  }
-  setData(data){
-    this.data = data
-  }
+
   updateData(){
     this.originData.english = this.data
     setApiData(this.originData)
@@ -38,32 +35,74 @@ class Database{
 }
 
   class UserDataManage{
-    construct(data)
-    displayUserData()//回傳displayText
-    addUserData()
-    createData()
-    removeUserData()
-  }
-  class Handler{
-    construct(userId,word,database){
+    constructor(userId,word,data){
       this.userId = userId
       this.word = word
+      this.data = data
+    }
+
+    displayUserData(){
+      
+      const id = this.userId
+      const key = Object.keys(this.data[id])
+      const value = Object.values(this.data[id])
+      const text = "```"
+      let data = "```單字表:\n"
+      key.forEach((item,index)=>{ 
+          data += `${index+1}. ${item}   >>>   ${value[index]} \n`
+      })
+      data += text
+      
+      return data
+    }//回傳displayText
+    addUserData(){}
+    createData(){}
+    removeUserData(){}
+  }
+  class Handler{
+    constructor(userId,addWord,removeWord,database){
+      this.userId = userId
+      this.addWord = addWord
+      this.removeWord = removeWord
       this.database = database //class
     }
-    handleAddWord()
-    handleRemoveWord()
-    handleDisplayWord()
+    handleAddWord(){}
+    handleRemoveWord(){}
+    async handleDisplayWord (){
+      
+      await this.database.initData()
+      if(this.database.isHaveData){
+        const data = this.database.data
+        const manage = new UserDataManage(this.userId,null,data) 
+        const displayText = manage.displayUserData()
+        return displayText
+      }else{
+        return "你還沒有建立資料"
+      }
+    }
   }
   
   
-  const handleEnglish=(userId,word)=>{
+  export const handleEnglish=async(addWord,removeWord ,userId,display)=>{
     let displayText = ""
-    const database = new Database (userId)
-    const handle = new Handler(userId,word,database)
-    //...
-    database.updateData()
+    const database = new Database(userId)
+    const handle = new Handler(userId,addWord,removeWord,database)
+    
+    if(addWord != null){
+      displayText = handle.handleAddWord()
+    }
+    if(removeWord != null){
+      displayText = handle.handleRemoveWord()
+    }
+    if(display == true){
+      displayText = await handle.handleDisplayWord()
+    }
+    
+    // database.updateData()
     return displayText
   }
+
+
   //get資料
   //判斷有無資料
   //處理（UserDataManage class）
