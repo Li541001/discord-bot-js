@@ -28,7 +28,7 @@ export const command = new SlashCommandBuilder()
   )
 
 export const action = async (ctx) => {
-  await ctx.reply(`@${ctx.user.tag}你好`);
+  await ctx.reply(`@${ctx.user.tag.toString()}你好`);
   let displayText = ""
   const userId = ctx.user.id
   let chooseUserId,addWord,removeWord

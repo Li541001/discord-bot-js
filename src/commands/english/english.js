@@ -55,9 +55,62 @@ class Database{
       
       return data
     }//回傳displayText
-    addUserData(){}
-    createData(){}
-    removeUserData(){}
+    addUserData(){
+      let value = ""
+      let key = ""
+      let status = false
+      for(let i=0;i<this.word.length;i++){
+          if(this.word[i] == " "){
+              status = true
+              continue
+          }
+          if(status == false){
+              key += this.word[i]
+          }else{
+              value += this.word[i]
+          }
+      }
+      const userID = this.userId
+      this.data[userID] = {...this.data[userID],[key]:value}
+      return "添加完成"
+    }
+    
+    createData(){
+      let value = ""
+      let key = ""
+      let status = false
+      for(let i=0;i<this.word.length;i++){
+          if(this.word[i] == " "){
+              status = true
+              continue
+          }
+          if(status == false){
+              key += this.word[i]
+          }else{
+              value += this.word[i]
+          }
+      }
+      const userID = this.userId
+      this.data = {...this.data,[userID]:{
+          [key]:value
+      }}
+      return "創建成功"
+    }
+    removeUserData(){
+      const userData = this.data[this.userId]
+      let status = false
+      for (const eng in userData){
+        if(data == this.word){
+          delete this.data.eng
+          status = true
+          return "刪除成功"
+        }
+      }
+      if(status == true){
+        return "沒有這個單字"
+      }
+      
+    }
   }
   class Handler{
     constructor(userId,addWord,removeWord,database){
@@ -66,8 +119,29 @@ class Database{
       this.removeWord = removeWord
       this.database = database //class
     }
-    handleAddWord(){}
-    handleRemoveWord(){}
+    async handleAddWord(){
+      await this.database.initData()
+      const data = this.database.data
+      const manage = new UserDataManage(this.userId,null,data) 
+      if(this.database.isHaveData){
+        const displayText = manage.addUserData()
+        return displayText
+      }else{
+        const displayText = manage.createData()
+        return displayText
+      }
+    }
+    async handleRemoveWord(){
+      await this.database.initData()
+      const data = this.database.data
+      const manage = new UserDataManage(this.userId,null,data) 
+      if(this.database.isHaveData){
+        const displayText = manage.removeUserData()
+        return displayText
+      }else{
+        return "你還沒有建立資料"
+      }
+    }
     async handleDisplayWord (){
       
       await this.database.initData()
@@ -89,10 +163,10 @@ class Database{
     const handle = new Handler(userId,addWord,removeWord,database)
     
     if(addWord != null){
-      displayText = handle.handleAddWord()
+      displayText = await handle.handleAddWord()
     }
     if(removeWord != null){
-      displayText = handle.handleRemoveWord()
+      displayText = await handle.handleRemoveWord()
     }
     if(display == true){
       displayText = await handle.handleDisplayWord()
