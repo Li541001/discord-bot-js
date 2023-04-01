@@ -47,7 +47,7 @@ class UserDataManage {
     const value = Object.values(this.data[id]);
     const text = "```";
 
-    let data = "```單字表:\n";
+    let data = "```js\n單字表:\n";
     key.forEach((item, index) => {
       let space = " ";
       const spaceTimes = 12 - item.length;
@@ -121,6 +121,47 @@ class UserDataManage {
       return "刪除成功";
     }
   }
+  markUserWord(){
+    const userData = this.data[this.userId];
+    const userDataKey = Object.keys(userData);
+    let status = false
+    userDataKey.forEach((item)=>{
+      if(item == this.word){
+        const value = userData[item]+'"'
+        delete userData[item]
+        const keyName = `"${item}`
+        userData[keyName] = value
+        status = true
+      }
+    })
+    if(status == true){
+      this.data[this.userId] = userData
+      return "標記完成"
+    }else{
+      return "沒有標記這個單字"
+    }
+  }
+  cancelMarkUserWord(){
+    const userData = this.data[this.userId];
+    const userDataKey = Object.keys(userData);
+    let status = false
+    userDataKey.forEach((item)=>{
+      const keyName = item.substring(1)
+      if(keyName == this.word){
+        const valuelength = userData[item].length
+        const value = userData[item].substring(0,valuelength-1)
+        delete userData[item]
+        userData[keyName] = value
+        status = true
+      }
+    })
+    if(status == true){
+      this.data[this.userId] = userData
+      return "取消標記完成"
+    }else{
+      return "沒有標記這個單字"
+    }
+  }
 }
 class CleanWordList {
   constructor(userId, data) {
@@ -181,10 +222,12 @@ class CleanWordList {
   }
 }
 class Handler {
-  constructor(userId, addWord, removeWord, cleanType, database) {
+  constructor(userId, addWord, removeWord,markWord,cancelMarkWord, cleanType, database) {
     this.userId = userId;
     this.addWord = addWord;
     this.removeWord = removeWord;
+    this.markWord = markWord;
+    this.cancelMarkWord = cancelMarkWord;
     this.cleanType = cleanType;
     this.database = database; //class
   }
@@ -225,6 +268,30 @@ class Handler {
       return "你還沒有建立資料";
     }
   }
+  async handleMarkWord() {
+    await this.database.initData();
+    if (this.database.isHaveData) {
+      const data = this.database.data;
+      const manage = new UserDataManage(this.userId, this.markWord, data);
+      const displayText = manage.markUserWord();
+      this.database.data = manage.data;
+      return displayText;
+    } else {
+      return "你還沒有建立資料";
+    }
+  }
+  async handleCancelMarkWord() {
+    await this.database.initData();
+    if (this.database.isHaveData) {
+      const data = this.database.data;
+      const manage = new UserDataManage(this.userId, this.cancelMarkWord, data);
+      const displayText = manage.cancelMarkUserWord();
+      this.database.data = manage.data;
+      return displayText;
+    } else {
+      return "你還沒有建立資料";
+    }
+  }
   async handleTydeUp() {
     await this.database.initData();
     if (this.database.isHaveData) {
@@ -238,7 +305,6 @@ class Handler {
       } else {
         displayText = tydeUp.toUppper();
       }
-
       this.database.data = tydeUp.data;
       return displayText;
     } else {
@@ -265,19 +331,26 @@ class Exam {
 export const handleEnglish = async (
   addWord,
   removeWord,
+  markWord,
+  cancelMarkWord,
   userId,
   display,
   clean
 ) => {
   let displayText = "";
   const database = new Database(userId);
-  const handle = new Handler(userId, addWord, removeWord, clean, database);
-
+  const handle = new Handler(userId, addWord, removeWord,markWord,cancelMarkWord, clean, database);
   if (addWord != null) {
     displayText = await handle.handleAddWord();
   }
   if (removeWord != null) {
     displayText = await handle.handleRemoveWord();
+  }
+  if (markWord != null) {
+    displayText = await handle.handleMarkWord();
+  }
+  if (cancelMarkWord != null) {
+    displayText = await handle.handleCancelMarkWord();
   }
   if (display == true) {
     displayText = await handle.handleDisplayWord();
@@ -295,103 +368,3 @@ export const handleEnglish = async (
 //處理（UserDataManage class）
 //set資料
 //return 引出內容
-
-// class English{
-//     constructor (data,displayUserID,word){
-//         this.data = data
-//         this.displayUserID = displayUserID
-//         this.word = word
-//     }
-//     getData(){
-//         const userID = this.displayUserID
-//         const key = Object.keys(this.data.english[userID])
-//         const value = Object.values(this.data.english[userID])
-//         const text = "```"
-//         let data = "```單字表\n"
-//         key.forEach((item,index)=>{
-//             data += `${index+1}. ${item} ${value[index]} \n`
-//         })
-//         data += text
-//         return data
-//     }
-
-//     contrastUser(){
-//         let sameID = false
-//         const keys = Object.keys(this.data.english)
-//         keys.forEach((item,index)=>{
-//             if(item == this.displayUserID){
-//                 sameID = true
-//             }
-//         })
-//         if(sameID == false){
-//             return false
-//         }else{
-//             return true
-//         }
-//     }
-
-//     createUserData(){
-//         let value = ""
-//         let key = ""
-//         let status = false
-//         for(let i=0;i<this.word.length;i++){
-//             if(this.word[i] == " "){
-//                 status = true
-//                 continue
-//             }
-//             if(status == false){
-//                 key += this.word[i]
-//             }else{
-//                 value += this.word[i]
-//             }
-//         }
-//         const userID = this.displayUserID
-//         const dataObj = {...this.data.english,[userID]:{
-//             [key]:value
-//         }}
-//         this.data.english = dataObj
-//         setApiData(this.data)
-//     }
-
-//     addUserData(){
-//     let value = ""
-//     let key = ""
-//     let status = false
-//     for(let i=0;i<this.word.length;i++){
-//         if(this.word[i] == " "){
-//             status = true
-//             continue
-//         }
-//         if(status == false){
-//             key += this.word[i]
-//         }else{
-//             value += this.word[i]
-//         }
-//     }
-//     const userID = this.displayUserID
-//     const dataObj = {...this.data.english[userID],[key]:value}
-//     this.data.english[userID] = dataObj
-//     setApiData(this.data)}
-
-// }
-
-// export const handleDisplay=async(displayUserID,word)=>{
-//     const apiData = await getApiData()
-//     const english = new English(apiData,displayUserID,word)
-//     const sameID = english.contrastUser()
-//     let printData = ""
-//     if(displayUserID != null && sameID == true){
-//         printData = english.getData()
-//     }else if(displayUserID != null && sameID == false){
-//         printData = "您沒有資料"
-//     }
-//     if(word != null && sameID == true){
-//         english.addUserData()
-//         printData = "添加成功"
-//     }else if(word != null && sameID == false){
-//         english.createUserData()
-//         printData = "創建成功"
-//     }
-//     console.log("compete")
-//     return printData
-// }

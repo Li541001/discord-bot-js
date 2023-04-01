@@ -22,6 +22,12 @@ export const command = new SlashCommandBuilder()
       .addStringOption((option) =>
         option.setName("remove").setDescription("移除你的單字")
       )
+      .addStringOption((option) =>
+        option.setName("mark").setDescription("標記單字")
+      )
+      .addStringOption((option) =>
+        option.setName("cancelmark").setDescription("取消標記")
+      )
   )
   .addSubcommand((subcommand) =>
     subcommand
@@ -63,17 +69,19 @@ export const action = async (ctx) => {
   await ctx.reply(`${ctx.user.tag.toString()}你好`);
   let displayText = "";
   const userId = ctx.user.id;
-  let chooseUserId, addWord, removeWord;
+  let chooseUserId, addWord, removeWord,markWord,cancelMarkWord;
   if (ctx.options.getSubcommand() === "display") {
     chooseUserId = ctx.options.getUser("user").id;
-    displayText = await handleEnglish(null, null, chooseUserId, true, null);
+    displayText = await handleEnglish(null, null,null,null, chooseUserId, true, null);
   } else if (ctx.options.getSubcommand() === "manage") {
     addWord = ctx.options.getString("add");
     removeWord = ctx.options.getString("remove");
-    displayText = await handleEnglish(addWord, removeWord, userId, false, null);
+    markWord = ctx.options.getString("mark");
+    cancelMarkWord = ctx.options.getString("cancelmark");
+    displayText = await handleEnglish(addWord, removeWord,markWord,cancelMarkWord, userId, false, null);
   } else if (ctx.options.getSubcommand() === "clean") {
     const tydeUpType = ctx.options.getString("type");
-    displayText = await handleEnglish(null, null, userId, false, tydeUpType);
+    displayText = await handleEnglish(null, null,null,null, userId, false, tydeUpType);
   }
   console.log(displayText);
   await ctx.editReply(displayText);
