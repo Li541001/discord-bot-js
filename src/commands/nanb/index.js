@@ -19,11 +19,15 @@ export const command = new SlashCommandBuilder()
       .addChoices(
         { name: "start", value: "start" },
         { name: "restart", value: "restart" },
-        { name:"status",value: "status"}
+        { name: "status", value: "status" }
       )
   )
   .addStringOption((option) =>
-    option.setName("guess").setDescription("請輸入你的答案").setMaxLength(4).setMinLength(4)
+    option
+      .setName("guess")
+      .setDescription("請輸入你的答案")
+      .setMaxLength(4)
+      .setMinLength(4)
   );
 
 export const action = async (ctx) => {

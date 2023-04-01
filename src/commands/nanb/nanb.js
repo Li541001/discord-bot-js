@@ -101,18 +101,17 @@ class Nanb {
     }
   };
 
-  handleStatus=()=>{
-    let startStatus,ansStatus,resultStatus
-    this.start? startStatus = "開始":startStatus = "結束"
-    if(this.ans != null){
-      ansStatus = "已設定"
+  handleStatus = () => {
+    let startStatus, ansStatus, resultStatus;
+    this.start ? (startStatus = "開始") : (startStatus = "結束");
+    if (this.ans != null) {
+      ansStatus = "已設定";
+    } else {
+      ansStatus = "未設定";
     }
-    else{
-      ansStatus = "未設定"
-    }
-    resultStatus = `遊戲狀態:\n    遊戲開始: ${startStatus}\n    答案設定: ${ansStatus}\n    答題次數: ${this.data.num.length}`
-    return resultStatus
-  }
+    resultStatus = `遊戲狀態:\n    遊戲開始: ${startStatus}\n    答案設定: ${ansStatus}\n    答題次數: ${this.data.num.length}`;
+    return resultStatus;
+  };
 
   compare = () => {
     let a = 0;
@@ -163,11 +162,9 @@ const stringToInt = (start) => {
     start = 1;
   } else if (start == "restart") {
     start = 2;
-  }
-  else if(start == "status"){
+  } else if (start == "status") {
     start = 3;
-  }
-  else {
+  } else {
     start = null;
   }
   return start;
@@ -177,10 +174,10 @@ export const playNanb = async (start, answer, guessnum, user) => {
   const data = await getApiData();
   const startBool = stringToInt(start);
   const playGame = new Nanb(startBool, answer, guessnum, data, user);
-  let gameStatus
+  let gameStatus;
   let error = null;
-  if(startBool == 3){
-    gameStatus = playGame.handleStatus()
+  if (startBool == 3) {
+    gameStatus = playGame.handleStatus();
   }
   if (startBool == 2) {
     playGame.clear();
@@ -194,7 +191,7 @@ export const playNanb = async (start, answer, guessnum, user) => {
     error = playGame.handleGuess();
   }
   await playGame.setting();
-  return { error: error, result: playGame.result,gameStatus:gameStatus };
+  return { error: error, result: playGame.result, gameStatus: gameStatus };
 };
 
 export const response = (playResult, startbool, number) => {
@@ -206,8 +203,8 @@ export const response = (playResult, startbool, number) => {
         printText = `遊戲開始~~\n`;
       } else if (startbool == "restart") {
         printText = `結束遊戲~~\n`;
-      } else if(startbool == "status"){
-        printText = playResult.gameStatus
+      } else if (startbool == "status") {
+        printText = playResult.gameStatus;
       }
     }
     if (number != null) {

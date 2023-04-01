@@ -1,7 +1,7 @@
 import { Configuration, OpenAIApi } from "openai";
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,7 +9,7 @@ const configuration = new Configuration({
 
 const openAI = new OpenAIApi(configuration);
 
-export const openAiMessage = async(prompt)=> {
+export const openAiMessage = async (prompt) => {
   try {
     const { data } = await openAI.createCompletion({
       model: "text-davinci-003",
@@ -24,4 +24,4 @@ export const openAiMessage = async(prompt)=> {
     console.error(error);
     return `對不起，我發生 **${error.response.status} - ${error.response.statusText}** 錯誤，所以不知道該怎麼回你 QQ`;
   }
-}
+};
