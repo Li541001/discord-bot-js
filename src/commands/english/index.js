@@ -37,7 +37,6 @@ export const command = new SlashCommandBuilder()
         option
           .setName("start")
           .setDescription("開始考試 請輸入英文單字測驗數量")
-          .setRequired(true)
           .setMinValue(1)
       )
       .addStringOption((option) =>
@@ -69,19 +68,58 @@ export const action = async (ctx) => {
   await ctx.reply(`${ctx.user.tag.toString()}你好`);
   let displayText = "";
   const userId = ctx.user.id;
-  let chooseUserId, addWord, removeWord,markWord,cancelMarkWord;
+  let chooseUserId, addWord, removeWord, markWord, cancelMarkWord;
   if (ctx.options.getSubcommand() === "display") {
     chooseUserId = ctx.options.getUser("user").id;
-    displayText = await handleEnglish(null, null,null,null, chooseUserId, true, null);
+    displayText = await handleEnglish(
+      null,
+      null,
+      null,
+      null,
+      chooseUserId,
+      true,
+      null,
+      null
+    );
   } else if (ctx.options.getSubcommand() === "manage") {
     addWord = ctx.options.getString("add");
     removeWord = ctx.options.getString("remove");
     markWord = ctx.options.getString("mark");
     cancelMarkWord = ctx.options.getString("cancelmark");
-    displayText = await handleEnglish(addWord, removeWord,markWord,cancelMarkWord, userId, false, null);
+    displayText = await handleEnglish(
+      addWord,
+      removeWord,
+      markWord,
+      cancelMarkWord,
+      userId,
+      false,
+      null,
+      null
+    );
   } else if (ctx.options.getSubcommand() === "clean") {
     const tydeUpType = ctx.options.getString("type");
-    displayText = await handleEnglish(null, null,null,null, userId, false, tydeUpType);
+    displayText = await handleEnglish(
+      null,
+      null,
+      null,
+      null,
+      userId,
+      false,
+      tydeUpType,
+      null
+    );
+  }else if(ctx.options.getSubcommand() === "quiz"){
+    const wordAmount = ctx.options.getInteger("start");
+    displayText = await handleEnglish(
+      null,
+      null,
+      null,
+      null,
+      userId,
+      false,
+      null,
+      wordAmount
+    );
   }
   console.log(displayText);
   await ctx.editReply(displayText);

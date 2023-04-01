@@ -121,45 +121,45 @@ class UserDataManage {
       return "刪除成功";
     }
   }
-  markUserWord(){
+  markUserWord() {
     const userData = this.data[this.userId];
     const userDataKey = Object.keys(userData);
-    let status = false
-    userDataKey.forEach((item)=>{
-      if(item == this.word){
-        const value = userData[item]+'"'
-        delete userData[item]
-        const keyName = `"${item}`
-        userData[keyName] = value
-        status = true
+    let status = false;
+    userDataKey.forEach((item) => {
+      if (item == this.word) {
+        const value = userData[item] + '"';
+        delete userData[item];
+        const keyName = `"${item}`;
+        userData[keyName] = value;
+        status = true;
       }
-    })
-    if(status == true){
-      this.data[this.userId] = userData
-      return "標記完成"
-    }else{
-      return "沒有標記這個單字"
+    });
+    if (status == true) {
+      this.data[this.userId] = userData;
+      return "標記完成";
+    } else {
+      return "沒有標記這個單字";
     }
   }
-  cancelMarkUserWord(){
+  cancelMarkUserWord() {
     const userData = this.data[this.userId];
     const userDataKey = Object.keys(userData);
-    let status = false
-    userDataKey.forEach((item)=>{
-      const keyName = item.substring(1)
-      if(keyName == this.word){
-        const valuelength = userData[item].length
-        const value = userData[item].substring(0,valuelength-1)
-        delete userData[item]
-        userData[keyName] = value
-        status = true
+    let status = false;
+    userDataKey.forEach((item) => {
+      const keyName = item.substring(1);
+      if (keyName == this.word) {
+        const valuelength = userData[item].length;
+        const value = userData[item].substring(0, valuelength - 1);
+        delete userData[item];
+        userData[keyName] = value;
+        status = true;
       }
-    })
-    if(status == true){
-      this.data[this.userId] = userData
-      return "取消標記完成"
-    }else{
-      return "沒有標記這個單字"
+    });
+    if (status == true) {
+      this.data[this.userId] = userData;
+      return "取消標記完成";
+    } else {
+      return "沒有標記這個單字";
     }
   }
 }
@@ -172,6 +172,12 @@ class CleanWordList {
     const userData = this.data[this.userId];
     const userDataKey = Object.keys(userData);
     userDataKey.sort((a, b) => {
+      if(a.charAt(0)==`"`){
+        a= a.substring(1)
+      }
+      if(b.charAt(0)==`"`){
+        b = b.substring(1)
+      }
       const firstCharA = a.charAt(0).toLowerCase();
       const firstCharB = b.charAt(0).toLowerCase();
       if (firstCharA < firstCharB) {
@@ -222,13 +228,23 @@ class CleanWordList {
   }
 }
 class Handler {
-  constructor(userId, addWord, removeWord,markWord,cancelMarkWord, cleanType, database) {
+  constructor(
+    userId,
+    addWord,
+    removeWord,
+    markWord,
+    cancelMarkWord,
+    cleanType,
+    wordAmount,
+    database
+  ) {
     this.userId = userId;
     this.addWord = addWord;
     this.removeWord = removeWord;
     this.markWord = markWord;
     this.cancelMarkWord = cancelMarkWord;
     this.cleanType = cleanType;
+    this.wordAmount = wordAmount;
     this.database = database; //class
   }
   async handleAddWord() {
@@ -311,18 +327,48 @@ class Handler {
       return "你還沒有建立資料";
     }
   }
+  async handleStartExam(){
+    
+    await this.database.initData();
+    if (this.database.isHaveData) {
+      const data = this.database.data;
+      const exam = new Exam(this.userId, this.wordAmount, this.userAnsewr,data);
+      
+      const displayText = exam.getRandomWord();
+      
+      return displayText;
+    } else {
+      return "你還沒有建立資料";
+    }
+  }
 }
 
 class Exam {
   //開始考試(設定單字數量、顯示考試單字)、結束考試(比對答案、顯示結果)
-  constructor(userId, wordAmount, userAnsewr, database) {
+  constructor(userId, wordAmount, userAnsewr, data) {
     this.userId = userId;
     this.wordAmount = wordAmount;
     this.userAnsewr = userAnsewr;
-    this.database = database;
+    this.data = data;
   }
   getRandomWord() {
-    const userData = this.database[this.userId];
+    const min = 1
+    const userData = this.data[this.userId]
+    
+    const userDataKey = Object.keys(userData)
+    const max = userDataKey.length
+    let randomNumList = []
+    this.randomKey = []
+    
+    for(let i=0;i<=this.wordAmount;i++){
+      const randomNum = Math.floor(Math.random()*(max-1))+min;
+      if(randomNumList.includes(randomNum)){
+        this.wordAmount+=1
+      }else{
+        randomNumList.push(randomNum)
+        this.randomKey.push(userDataKey[randomNum])
+      }
+    }
   }
   displaySubjectWord() {}
   compareAnswer() {}
@@ -335,11 +381,21 @@ export const handleEnglish = async (
   cancelMarkWord,
   userId,
   display,
-  clean
+  clean,
+  wordAmount
 ) => {
   let displayText = "";
   const database = new Database(userId);
-  const handle = new Handler(userId, addWord, removeWord,markWord,cancelMarkWord, clean, database);
+  const handle = new Handler(
+    userId,
+    addWord,
+    removeWord,
+    markWord,
+    cancelMarkWord,
+    clean,
+    wordAmount,
+    database
+  );
   if (addWord != null) {
     displayText = await handle.handleAddWord();
   }
@@ -358,11 +414,15 @@ export const handleEnglish = async (
   if (clean != null) {
     displayText = await handle.handleTydeUp();
   }
+  if(wordAmount != null){
+    
+    displayText = await handle.handleStartExam();
+    
+  }
 
   database.updateData();
   return displayText;
 };
-
 //get資料
 //判斷有無資料
 //處理（UserDataManage class）
