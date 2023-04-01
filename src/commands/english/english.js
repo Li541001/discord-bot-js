@@ -98,18 +98,20 @@ class Database{
     }
     removeUserData(){
       const userData = this.data[this.userId]
+      const userDataKey = Object.keys(userData)
       let status = false
-      for (const eng in userData){
-        if(data == this.word){
-          delete this.data.eng
+      userDataKey.forEach((item,index)=>{
+        if(item === this.word && item != undefined){
+          delete this.data[this.userId][item]
           status = true
-          return "刪除成功"
+          return
         }
-      }
-      if(status == true){
+      })
+      if(status == false){
         return "沒有這個單字"
+      }else{
+        return "刪除成功"
       }
-      
     }
   }
   class Handler{
@@ -122,21 +124,24 @@ class Database{
     async handleAddWord(){
       await this.database.initData()
       const data = this.database.data
-      const manage = new UserDataManage(this.userId,null,data) 
+      const manage = new UserDataManage(this.userId,this.addWord,data) 
       if(this.database.isHaveData){
         const displayText = manage.addUserData()
+        this.database.data = manage.data
         return displayText
       }else{
         const displayText = manage.createData()
+        this.database.data = manage.data
         return displayText
       }
     }
     async handleRemoveWord(){
       await this.database.initData()
       const data = this.database.data
-      const manage = new UserDataManage(this.userId,null,data) 
+      const manage = new UserDataManage(this.userId,this.removeWord,data) 
       if(this.database.isHaveData){
         const displayText = manage.removeUserData()
+        this.database.data = manage.data
         return displayText
       }else{
         return "你還沒有建立資料"
@@ -155,6 +160,21 @@ class Database{
       }
     }
   }
+
+  class Exam{  //開始考試(設定單字數量、顯示考試單字)、結束考試(比對答案、顯示結果)
+    constructor(userId,wordAmount,userAnsewr,database){
+      this.userId = userId
+      this.wordAmount = wordAmount
+      this.userAnsewr = userAnsewr
+      this.database = database
+    }
+    getRandomWord(){
+      const userData = this.database[this.userId]
+      
+    }
+    displaySubjectWord(){}
+    compareAnswer(){}
+  }
   
   
   export const handleEnglish=async(addWord,removeWord ,userId,display)=>{
@@ -172,7 +192,7 @@ class Database{
       displayText = await handle.handleDisplayWord()
     }
     
-    // database.updateData()
+    database.updateData()
     return displayText
   }
 
