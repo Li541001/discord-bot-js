@@ -120,7 +120,7 @@ export const action = async (ctx) => {
       null,
       null
     );
-  }else if(ctx.options.getSubcommand() === "quiz"){
+  } else if (ctx.options.getSubcommand() === "quiz") {
     const wordAmount = ctx.options.getInteger("start");
     const endExam = ctx.options.getString("end");
     const answerExam = ctx.options.getString("answer");

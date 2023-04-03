@@ -172,11 +172,11 @@ class CleanWordList {
     const userData = this.data[this.userId];
     const userDataKey = Object.keys(userData);
     userDataKey.sort((a, b) => {
-      if(a.charAt(0)==`"`){
-        a= a.substring(1)
+      if (a.charAt(0) == `"`) {
+        a = a.substring(1);
       }
-      if(b.charAt(0)==`"`){
-        b = b.substring(1)
+      if (b.charAt(0) == `"`) {
+        b = b.substring(1);
       }
       const firstCharA = a.charAt(0).toLowerCase();
       const firstCharB = b.charAt(0).toLowerCase();
@@ -331,13 +331,18 @@ class Handler {
       return "你還沒有建立資料";
     }
   }
-  async handleStartExam(){
+  async handleStartExam() {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
-      const qualify =  exam.isStart()
-      if(qualify) return "有考試正在進行 請使用end指令結束考試"
+      const exam = new Exam(
+        this.userId,
+        this.wordAmount,
+        this.answerExam,
+        data
+      );
+      const qualify = exam.isStart();
+      if (qualify) return "有考試正在進行 請使用end指令結束考試";
       exam.getRandomWord();
       exam.storeRandomWord();
       this.database.data = exam.data;
@@ -347,38 +352,46 @@ class Handler {
       return "你還沒有建立資料";
     }
   }
-  async handleEndExam(){
+  async handleEndExam() {
     await this.database.initData();
-    if(this.endExam == "2") return "oh on!"
+    if (this.endExam == "2") return "oh on!";
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
-      const qualify =  exam.isStart()
-      if(!qualify){
-        return "目前沒有考試進行中"
-      } else{
-        exam.shutDownExam()
-        return "考試結束"
+      const exam = new Exam(
+        this.userId,
+        this.wordAmount,
+        this.answerExam,
+        data
+      );
+      const qualify = exam.isStart();
+      if (!qualify) {
+        return "目前沒有考試進行中";
+      } else {
+        exam.shutDownExam();
+        return "考試結束";
       }
     } else {
       return "你還沒有建立資料";
     }
   }
-  async handleAnswerExam(){
+  async handleAnswerExam() {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
-      const qualify =  exam.isStart()
-      if(!qualify){
-        return "目前沒有考試"
-      } 
-      
-      const displayText = exam.compareAnswer()
-      exam.shutDownExam()
-      return displayText
+      const exam = new Exam(
+        this.userId,
+        this.wordAmount,
+        this.answerExam,
+        data
+      );
+      const qualify = exam.isStart();
+      if (!qualify) {
+        return "目前沒有考試";
+      }
 
-
+      const displayText = exam.compareAnswer();
+      exam.shutDownExam();
+      return displayText;
     } else {
       return "你還沒有建立資料";
     }
@@ -392,78 +405,77 @@ class Exam {
     this.wordAmount = wordAmount - 1;
     this.userAnsewr = userAnsewr;
     this.data = data;
-    this.randomKey = []
-    
+    this.randomKey = [];
   }
-  isStart(){
-    const userData = this.data.exam
-    if(userData == undefined){
-      return false
-    }else{
-      return true
+  isStart() {
+    const userData = this.data.exam;
+    if (userData == undefined) {
+      return false;
+    } else {
+      return true;
     }
   }
   getRandomWord() {
-    const min = 1
-    const userData = this.data[this.userId]
-    
-    const userDataKey = Object.keys(userData)
-    const max = userDataKey.length
-    let randomNumList = []
-    this.randomKey = []
-    
-    for(let i=0;i<=this.wordAmount;i++){
-      const randomNum = Math.floor(Math.random()*(max-1))+min;
-      if(randomNumList.includes(randomNum)){
-        this.wordAmount+=1
-      }else{
-        randomNumList.push(randomNum)
-        this.randomKey.push(userDataKey[randomNum])
+    const min = 1;
+    const userData = this.data[this.userId];
+
+    const userDataKey = Object.keys(userData);
+    const max = userDataKey.length;
+    let randomNumList = [];
+    this.randomKey = [];
+
+    for (let i = 0; i <= this.wordAmount; i++) {
+      const randomNum = Math.floor(Math.random() * (max - 1)) + min;
+      if (randomNumList.includes(randomNum)) {
+        this.wordAmount += 1;
+      } else {
+        randomNumList.push(randomNum);
+        this.randomKey.push(userDataKey[randomNum]);
       }
     }
   }
-  storeRandomWord(){
-    const userData = this.data[this.userId]
-    let newObj = {}
-    this.randomKey.forEach((item)=>{
-      const value = userData[item]
-      newObj[item] = value
-    })
-    this.data = {...this.data,"exam":newObj}
+  storeRandomWord() {
+    const userData = this.data[this.userId];
+    let newObj = {};
+    this.randomKey.forEach((item) => {
+      const value = userData[item];
+      newObj[item] = value;
+    });
+    this.data = { ...this.data, exam: newObj };
   }
   displaySubjectWord() {
     let displayText = "```js\n題目:\n";
-    const text = "```"
-    this.randomKey.forEach((item,index)=>{
-      displayText += `${index + 1}. ${item}\n`
-    })
-    displayText += text
-    return displayText
+    const text = "```";
+    this.randomKey.forEach((item, index) => {
+      displayText += `${index + 1}. ${item}\n`;
+    });
+    displayText += text;
+    return displayText;
   }
-  shutDownExam(){
-    delete this.data.exam
+  shutDownExam() {
+    delete this.data.exam;
   }
   compareAnswer() {
-    const userData = this.data.exam
-    const value = Object.values(userData)
-    const key = Object.keys(userData)
-    let answerList = []
-    let temp = ""
-    let finnalText = "```diff\n結果:\n"
-    finnalText += `    題目                 正確答案     你的答案\n`
-    let correctNum = 0
-    for(let i of (this.userAnsewr+=" ")){
-      if(i == " "){
-        answerList.push(temp)
-        temp = ""
-      }else{
-        temp += i
+    const userData = this.data.exam;
+    const value = Object.values(userData);
+    const key = Object.keys(userData);
+    let answerList = [];
+    let temp = "";
+    let finnalText = "```diff\n結果:\n";
+    finnalText += `    題目                 正確答案     你的答案\n`;
+    let correctNum = 0;
+    for (let i of (this.userAnsewr += " ")) {
+      if (i == " ") {
+        answerList.push(temp);
+        temp = "";
+      } else {
+        temp += i;
       }
     }
-    value.forEach((item,index)=>{
+    value.forEach((item, index) => {
       let space = " ";
       let space2 = " ";
-      
+
       const spaceTimes = 12 - key[index].length;
       const spaceTimes2 = 8 - item.length;
       for (let i = 0; i <= spaceTimes; i++) {
@@ -473,17 +485,21 @@ class Exam {
         space2 = space2 + " ";
       }
 
-      if(item == answerList[index]){
-        finnalText += `+${index+1}. ${key[index]}${space}>>>    ${item}${space2}${answerList[index]}\n`
-        correctNum += 1
-      }else{
-        finnalText += `-${index+1}. ${key[index]}${space}>>>    ${item}${space2}${answerList[index]}\n`
+      if (item == answerList[index]) {
+        finnalText += `+${index + 1}. ${
+          key[index]
+        }${space}>>>    ${item}${space2}${answerList[index]}\n`;
+        correctNum += 1;
+      } else {
+        finnalText += `-${index + 1}. ${
+          key[index]
+        }${space}>>>    ${item}${space2}${answerList[index]}\n`;
       }
-    })
-    const fraction = Math.round((correctNum/key.length)*1000)/10
-    finnalText += `\n\n    得分: ${fraction}\nend----------------------------------`
-    finnalText += "```"
-    return finnalText
+    });
+    const fraction = Math.round((correctNum / key.length) * 1000) / 10;
+    finnalText += `\n\n    得分: ${fraction}\nend----------------------------------`;
+    finnalText += "```";
+    return finnalText;
   }
 }
 
@@ -531,16 +547,16 @@ export const handleEnglish = async (
   if (clean != null) {
     displayText = await handle.handleTydeUp();
   }
-  if(wordAmount != null){
+  if (wordAmount != null) {
     displayText = await handle.handleStartExam();
   }
-  if(endExam != null){
+  if (endExam != null) {
     displayText = await handle.handleEndExam();
   }
-  if(answerExam != null){
+  if (answerExam != null) {
     displayText = await handle.handleAnswerExam();
   }
-  if(database.data != {}){
+  if (database.data != {}) {
     database.updateData();
   }
   return displayText;
