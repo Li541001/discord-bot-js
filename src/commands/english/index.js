@@ -43,7 +43,13 @@ export const command = new SlashCommandBuilder()
         option.setName("answer").setDescription("請輸入答案")
       )
       .addStringOption((option) =>
-        option.setName("end").setDescription("強制結束")
+        option
+          .setName("end")
+          .setDescription("結束考試")
+          .addChoices(
+            { name: "indeed", value: "1" },
+            { name: "cancel", value: "2" }
+          )
       )
   )
   .addSubcommand((subcommand) =>
@@ -79,6 +85,8 @@ export const action = async (ctx) => {
       chooseUserId,
       true,
       null,
+      null,
+      null,
       null
     );
   } else if (ctx.options.getSubcommand() === "manage") {
@@ -94,6 +102,8 @@ export const action = async (ctx) => {
       userId,
       false,
       null,
+      null,
+      null,
       null
     );
   } else if (ctx.options.getSubcommand() === "clean") {
@@ -106,10 +116,14 @@ export const action = async (ctx) => {
       userId,
       false,
       tydeUpType,
+      null,
+      null,
       null
     );
   }else if(ctx.options.getSubcommand() === "quiz"){
     const wordAmount = ctx.options.getInteger("start");
+    const endExam = ctx.options.getString("end");
+    const answerExam = ctx.options.getString("answer");
     displayText = await handleEnglish(
       null,
       null,
@@ -118,7 +132,9 @@ export const action = async (ctx) => {
       userId,
       false,
       null,
-      wordAmount
+      wordAmount,
+      endExam,
+      answerExam
     );
   }
   console.log(displayText);

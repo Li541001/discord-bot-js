@@ -236,6 +236,8 @@ class Handler {
     cancelMarkWord,
     cleanType,
     wordAmount,
+    endExam,
+    answerExam,
     database
   ) {
     this.userId = userId;
@@ -245,6 +247,8 @@ class Handler {
     this.cancelMarkWord = cancelMarkWord;
     this.cleanType = cleanType;
     this.wordAmount = wordAmount;
+    this.endExam = endExam;
+    this.answerExam = answerExam;
     this.database = database; //class
   }
   async handleAddWord() {
@@ -328,15 +332,53 @@ class Handler {
     }
   }
   async handleStartExam(){
-    
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const exam = new Exam(this.userId, this.wordAmount, this.userAnsewr,data);
-      
-      const displayText = exam.getRandomWord();
-      
+      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
+      const qualify =  exam.isStart()
+      if(qualify) return "有考試正在進行 請使用end指令結束考試"
+      exam.getRandomWord();
+      exam.storeRandomWord();
+      this.database.data = exam.data;
+      const displayText = exam.displaySubjectWord();
       return displayText;
+    } else {
+      return "你還沒有建立資料";
+    }
+  }
+  async handleEndExam(){
+    await this.database.initData();
+    if(this.endExam == "2") return "oh on!"
+    if (this.database.isHaveData) {
+      const data = this.database.data;
+      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
+      const qualify =  exam.isStart()
+      if(!qualify){
+        return "目前沒有考試進行中"
+      } else{
+        exam.shutDownExam()
+        return "考試結束"
+      }
+    } else {
+      return "你還沒有建立資料";
+    }
+  }
+  async handleAnswerExam(){
+    await this.database.initData();
+    if (this.database.isHaveData) {
+      const data = this.database.data;
+      const exam = new Exam(this.userId, this.wordAmount, this.answerExam,data);
+      const qualify =  exam.isStart()
+      if(!qualify){
+        return "目前沒有考試"
+      } 
+      
+      const displayText = exam.compareAnswer()
+      exam.shutDownExam()
+      return displayText
+
+
     } else {
       return "你還沒有建立資料";
     }
@@ -347,9 +389,19 @@ class Exam {
   //開始考試(設定單字數量、顯示考試單字)、結束考試(比對答案、顯示結果)
   constructor(userId, wordAmount, userAnsewr, data) {
     this.userId = userId;
-    this.wordAmount = wordAmount;
+    this.wordAmount = wordAmount - 1;
     this.userAnsewr = userAnsewr;
     this.data = data;
+    this.randomKey = []
+    
+  }
+  isStart(){
+    const userData = this.data.exam
+    if(userData == undefined){
+      return false
+    }else{
+      return true
+    }
   }
   getRandomWord() {
     const min = 1
@@ -370,8 +422,69 @@ class Exam {
       }
     }
   }
-  displaySubjectWord() {}
-  compareAnswer() {}
+  storeRandomWord(){
+    const userData = this.data[this.userId]
+    let newObj = {}
+    this.randomKey.forEach((item)=>{
+      const value = userData[item]
+      newObj[item] = value
+    })
+    this.data = {...this.data,"exam":newObj}
+  }
+  displaySubjectWord() {
+    let displayText = "```js\n題目:\n";
+    const text = "```"
+    this.randomKey.forEach((item,index)=>{
+      displayText += `${index + 1}. ${item}\n`
+    })
+    displayText += text
+    return displayText
+  }
+  shutDownExam(){
+    delete this.data.exam
+  }
+  compareAnswer() {
+    const userData = this.data.exam
+    const value = Object.values(userData)
+    const key = Object.keys(userData)
+    let answerList = []
+    let temp = ""
+    let finnalText = "```diff\n結果:\n"
+    finnalText += `    題目                 正確答案     你的答案\n`
+    let correctNum = 0
+    for(let i of (this.userAnsewr+=" ")){
+      if(i == " "){
+        answerList.push(temp)
+        temp = ""
+      }else{
+        temp += i
+      }
+    }
+    value.forEach((item,index)=>{
+      let space = " ";
+      let space2 = " ";
+      
+      const spaceTimes = 12 - key[index].length;
+      const spaceTimes2 = 8 - item.length;
+      for (let i = 0; i <= spaceTimes; i++) {
+        space = space + " ";
+      }
+      for (let i = 0; i <= spaceTimes2; i++) {
+        space2 = space2 + " ";
+      }
+
+      if(item == answerList[index]){
+        finnalText += `+${index+1}. ${key[index]}${space}>>>    ${item}${space2}${answerList[index]}\n`
+        correctNum += 1
+      }else{
+        finnalText += `-${index+1}. ${key[index]}${space}>>>    ${item}${space2}${answerList[index]}\n`
+      }
+    })
+    const fraction = Math.round((correctNum/key.length)*1000)/10
+    finnalText += `\n\n    得分: ${fraction}\nend----------------------------------`
+    finnalText += "```"
+    return finnalText
+  }
 }
 
 export const handleEnglish = async (
@@ -382,7 +495,9 @@ export const handleEnglish = async (
   userId,
   display,
   clean,
-  wordAmount
+  wordAmount,
+  endExam,
+  answerExam
 ) => {
   let displayText = "";
   const database = new Database(userId);
@@ -394,6 +509,8 @@ export const handleEnglish = async (
     cancelMarkWord,
     clean,
     wordAmount,
+    endExam,
+    answerExam,
     database
   );
   if (addWord != null) {
@@ -415,12 +532,17 @@ export const handleEnglish = async (
     displayText = await handle.handleTydeUp();
   }
   if(wordAmount != null){
-    
     displayText = await handle.handleStartExam();
-    
   }
-
-  database.updateData();
+  if(endExam != null){
+    displayText = await handle.handleEndExam();
+  }
+  if(answerExam != null){
+    displayText = await handle.handleAnswerExam();
+  }
+  if(database.data != {}){
+    database.updateData();
+  }
   return displayText;
 };
 //get資料
