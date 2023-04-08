@@ -35,7 +35,7 @@ class Database {
 }
 
 class UserDataManage {
-  constructor(userId,display, word, data) {
+  constructor(userId, display, word, data) {
     this.userId = userId;
     this.display = display;
     this.word = word;
@@ -48,12 +48,12 @@ class UserDataManage {
     const value = Object.values(this.data[id]);
     const text = "```";
     let data = "```js\n單字表:\n";
-    
-    const pageLowLimit = (this.display - 1)*50
-    const pageUpLimit = pageLowLimit+50
-    if(key.length < pageLowLimit+1) return "你的單字表沒有這頁"
+
+    const pageLowLimit = (this.display - 1) * 50;
+    const pageUpLimit = pageLowLimit + 50;
+    if (key.length < pageLowLimit + 1) return "你的單字表沒有這頁";
     key.forEach((item, index) => {
-      if(index < pageLowLimit || index >= pageUpLimit ) return
+      if (index < pageLowLimit || index >= pageUpLimit) return;
       let space = " ";
       const spaceTimes = 12 - item.length;
       for (let i = 0; i <= spaceTimes; i++) {
@@ -261,7 +261,12 @@ class Handler {
   async handleAddWord() {
     await this.database.initData();
     const data = this.database.data;
-    const manage = new UserDataManage(this.userId,this.display, this.addWord, data);
+    const manage = new UserDataManage(
+      this.userId,
+      this.display,
+      this.addWord,
+      data
+    );
     if (this.database.isHaveData) {
       const displayText = manage.addUserData();
       this.database.data = manage.data;
@@ -275,7 +280,12 @@ class Handler {
   async handleRemoveWord() {
     await this.database.initData();
     const data = this.database.data;
-    const manage = new UserDataManage(this.userId,this.display, this.removeWord, data);
+    const manage = new UserDataManage(
+      this.userId,
+      this.display,
+      this.removeWord,
+      data
+    );
     if (this.database.isHaveData) {
       const displayText = manage.removeUserData();
       this.database.data = manage.data;
@@ -288,7 +298,7 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId,this.display, null, data);
+      const manage = new UserDataManage(this.userId, this.display, null, data);
       const displayText = manage.displayUserData();
       return displayText;
     } else {
@@ -299,7 +309,12 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId,this.display, this.markWord, data);
+      const manage = new UserDataManage(
+        this.userId,
+        this.display,
+        this.markWord,
+        data
+      );
       const displayText = manage.markUserWord();
       this.database.data = manage.data;
       return displayText;
@@ -311,7 +326,12 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId,this.display, this.cancelMarkWord, data);
+      const manage = new UserDataManage(
+        this.userId,
+        this.display,
+        this.cancelMarkWord,
+        data
+      );
       const displayText = manage.cancelMarkUserWord();
       this.database.data = manage.data;
       return displayText;
