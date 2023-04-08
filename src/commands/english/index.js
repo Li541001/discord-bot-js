@@ -11,6 +11,11 @@ export const command = new SlashCommandBuilder()
       .addUserOption((option) =>
         option.setName("user").setDescription("選擇你要查看的單字表")
       )
+      .addIntegerOption((option)=>
+        option
+          .setName("page")
+          .setDescription("選擇要顯示第幾頁")
+      )
   )
   .addSubcommand((subcommand) =>
     subcommand
@@ -77,13 +82,17 @@ export const action = async (ctx) => {
   let chooseUserId, addWord, removeWord, markWord, cancelMarkWord;
   if (ctx.options.getSubcommand() === "display") {
     chooseUserId = ctx.options.getUser("user").id;
+    let page = ctx.options.getInteger("page")
+    if(page == null){
+      page = 1
+    }
     displayText = await handleEnglish(
       null,
       null,
       null,
       null,
       chooseUserId,
-      true,
+      page,
       null,
       null,
       null,

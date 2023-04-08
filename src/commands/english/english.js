@@ -35,8 +35,9 @@ class Database {
 }
 
 class UserDataManage {
-  constructor(userId, word, data) {
+  constructor(userId,display, word, data) {
     this.userId = userId;
+    this.display = display;
     this.word = word;
     this.data = data;
   }
@@ -46,9 +47,13 @@ class UserDataManage {
     const key = Object.keys(this.data[id]);
     const value = Object.values(this.data[id]);
     const text = "```";
-
     let data = "```js\n單字表:\n";
+    
+    const pageLowLimit = (this.display - 1)*50
+    const pageUpLimit = pageLowLimit+50
+    if(key.length < pageLowLimit+1) return "你的單字表沒有這頁"
     key.forEach((item, index) => {
+      if(index < pageLowLimit || index >= pageUpLimit ) return
       let space = " ";
       const spaceTimes = 12 - item.length;
       for (let i = 0; i <= spaceTimes; i++) {
@@ -230,6 +235,7 @@ class CleanWordList {
 class Handler {
   constructor(
     userId,
+    display,
     addWord,
     removeWord,
     markWord,
@@ -241,6 +247,7 @@ class Handler {
     database
   ) {
     this.userId = userId;
+    this.display = display;
     this.addWord = addWord;
     this.removeWord = removeWord;
     this.markWord = markWord;
@@ -254,7 +261,7 @@ class Handler {
   async handleAddWord() {
     await this.database.initData();
     const data = this.database.data;
-    const manage = new UserDataManage(this.userId, this.addWord, data);
+    const manage = new UserDataManage(this.userId,this.display, this.addWord, data);
     if (this.database.isHaveData) {
       const displayText = manage.addUserData();
       this.database.data = manage.data;
@@ -268,7 +275,7 @@ class Handler {
   async handleRemoveWord() {
     await this.database.initData();
     const data = this.database.data;
-    const manage = new UserDataManage(this.userId, this.removeWord, data);
+    const manage = new UserDataManage(this.userId,this.display, this.removeWord, data);
     if (this.database.isHaveData) {
       const displayText = manage.removeUserData();
       this.database.data = manage.data;
@@ -281,7 +288,7 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId, null, data);
+      const manage = new UserDataManage(this.userId,this.display, null, data);
       const displayText = manage.displayUserData();
       return displayText;
     } else {
@@ -292,7 +299,7 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId, this.markWord, data);
+      const manage = new UserDataManage(this.userId,this.display, this.markWord, data);
       const displayText = manage.markUserWord();
       this.database.data = manage.data;
       return displayText;
@@ -304,7 +311,7 @@ class Handler {
     await this.database.initData();
     if (this.database.isHaveData) {
       const data = this.database.data;
-      const manage = new UserDataManage(this.userId, this.cancelMarkWord, data);
+      const manage = new UserDataManage(this.userId,this.display, this.cancelMarkWord, data);
       const displayText = manage.cancelMarkUserWord();
       this.database.data = manage.data;
       return displayText;
@@ -519,6 +526,7 @@ export const handleEnglish = async (
   const database = new Database(userId);
   const handle = new Handler(
     userId,
+    display,
     addWord,
     removeWord,
     markWord,
@@ -541,7 +549,7 @@ export const handleEnglish = async (
   if (cancelMarkWord != null) {
     displayText = await handle.handleCancelMarkWord();
   }
-  if (display == true) {
+  if (display != null) {
     displayText = await handle.handleDisplayWord();
   }
   if (clean != null) {
