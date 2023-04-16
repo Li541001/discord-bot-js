@@ -5,5 +5,6 @@ export const command = new SlashCommandBuilder()
   .setDescription("測試用");
 
 export const action = async (ctx) => {
-  await ctx.reply("閉嘴");
+  await ctx.deferReply()
+  await ctx.followUp('oh no!')
 };

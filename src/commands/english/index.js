@@ -11,9 +11,6 @@ export const command = new SlashCommandBuilder()
       .addUserOption((option) =>
         option.setName("user").setDescription("選擇你要查看的單字表")
       )
-      .addIntegerOption((option) =>
-        option.setName("page").setDescription("選擇要顯示第幾頁")
-      )
   )
   .addSubcommand((subcommand) =>
     subcommand
@@ -74,17 +71,14 @@ export const command = new SlashCommandBuilder()
   );
 
 export const action = async (ctx) => {
-  await ctx.reply(`${ctx.user.tag.toString()}你好`);
+  await ctx.deferReply()
   let displayText = "";
   const userId = ctx.user.id;
   let chooseUserId, addWord, removeWord, markWord, cancelMarkWord;
   if (ctx.options.getSubcommand() === "display") {
     chooseUserId = ctx.options.getUser("user").id;
-    let page = ctx.options.getInteger("page");
-    if (page == null) {
-      page = 1;
-    }
-    displayText = await handleEnglish(
+    const page = 1
+    const displayTextList = await handleEnglish(
       null,
       null,
       null,
@@ -96,6 +90,10 @@ export const action = async (ctx) => {
       null,
       null
     );
+    displayTextList.map(async(item)=>{
+      await ctx.followUp(item)
+    })
+    return
   } else if (ctx.options.getSubcommand() === "manage") {
     addWord = ctx.options.getString("add");
     removeWord = ctx.options.getString("remove");
@@ -145,5 +143,5 @@ export const action = async (ctx) => {
     );
   }
   console.log(displayText);
-  await ctx.editReply(displayText);
+  await ctx.followUp(displayText);
 };

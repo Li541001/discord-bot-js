@@ -47,23 +47,31 @@ class UserDataManage {
     const key = Object.keys(this.data[id]);
     const value = Object.values(this.data[id]);
     const text = "```";
-    let data = "```js\n單字表:\n";
+    let dataList = []
+    
+    
+    
+    
+    for(let page = 0;page < (key.length)/50;page++){
+      let data = "```js\n單字表:\n";
+      const pageLowLimit = page * 50;
+      const pageUpLimit = pageLowLimit + 50;
 
-    const pageLowLimit = (this.display - 1) * 50;
-    const pageUpLimit = pageLowLimit + 50;
-    if (key.length < pageLowLimit + 1) return "你的單字表沒有這頁";
-    key.forEach((item, index) => {
-      if (index < pageLowLimit || index >= pageUpLimit) return;
-      let space = " ";
-      const spaceTimes = 12 - item.length;
-      for (let i = 0; i <= spaceTimes; i++) {
-        space = space + " ";
-      }
-      data += `${index + 1}. ${item}${space}>>>        ${value[index]} \n`;
-    });
-    data += text;
+      key.forEach((item, index) => {
+        if (index < pageLowLimit || index >= pageUpLimit) return;
+        let space = " ";
+        const spaceTimes = 12 - item.length;
+        for (let i = 0; i <= spaceTimes; i++) {
+          space = space + " ";
+        }
+        data += `${index + 1}. ${item}${space}>>>        ${value[index]} \n`;
+      });
+      data += text;
 
-    return data;
+      dataList.push(data)
+    }
+
+    return dataList;
   } //回傳displayText
   addUserData() {
     let value = "";
@@ -570,7 +578,8 @@ export const handleEnglish = async (
     displayText = await handle.handleCancelMarkWord();
   }
   if (display != null) {
-    displayText = await handle.handleDisplayWord();
+    const displayTextList = await handle.handleDisplayWord();
+    return displayTextList
   }
   if (clean != null) {
     displayText = await handle.handleTydeUp();
