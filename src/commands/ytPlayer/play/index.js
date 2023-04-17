@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { botGlobalData } from "../../store/data.js";
+import { botGlobalData } from "../../../store/data.js";
 import { QueryType } from "discord-player";
 
 export const command = new SlashCommandBuilder()
@@ -19,7 +19,7 @@ export const action = async (ctx) => {
   });
   // 尋找歌曲
   if (!searchResult || !searchResult.tracks.length)
-    return await ctx.followUp({ content: "warn: 沒有找到您的歌曲" });
+    return await ctx.followUp({ content: "❌ | 沒有找到您的歌曲" });
 
   const queue = await botGlobalData.player.nodes.create(ctx.guild, {
     metadata: {
@@ -32,14 +32,14 @@ export const action = async (ctx) => {
     if (!queue.connection) await queue.connect(ctx.member.voice.channel);
     // 加入頻道
   } catch {
-    await botGlobalData.player.deleteQueue(ctx.guildId);
+    await botGlobalData.player.nodes.delete(ctx.guildId);
     return await ctx.followUp({
-      content: "warn: 無法加入語音頻道!",
+      content: "❌ | 無法加入語音頻道!",
     });
   }
 
   // await ctx.followUp({ content: `⏱ | Loading your ${searchResult.playlist ? "playlist" : "track"}    >>>    ${query}` });
-  await ctx.followUp({ content: `⏱ | Loading your song    >>>    ${query}` });
+  await ctx.followUp({ content: `✅ | 成功添加音樂    >>>    ${query}` });
 
   // searchResult.playlist ? queue.addTracks(searchResult.tracks) : queue.addTrack(searchResult.tracks[0]);
   queue.addTrack(searchResult.tracks[0]);

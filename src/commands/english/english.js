@@ -47,12 +47,9 @@ class UserDataManage {
     const key = Object.keys(this.data[id]);
     const value = Object.values(this.data[id]);
     const text = "```";
-    let dataList = []
-    
-    
-    
-    
-    for(let page = 0;page < (key.length)/50;page++){
+    let dataList = [];
+
+    for (let page = 0; page < key.length / 50; page++) {
       let data = "```js\n單字表:\n";
       const pageLowLimit = page * 50;
       const pageUpLimit = pageLowLimit + 50;
@@ -68,7 +65,7 @@ class UserDataManage {
       });
       data += text;
 
-      dataList.push(data)
+      dataList.push(data);
     }
 
     return dataList;
@@ -90,7 +87,7 @@ class UserDataManage {
     }
     const userID = this.userId;
     this.data[userID] = { ...this.data[userID], [key]: value };
-    return "添加完成";
+    return "✅ | 添加完成";
   }
 
   createData() {
@@ -115,7 +112,7 @@ class UserDataManage {
         [key]: value,
       },
     };
-    return "創建成功";
+    return "✅ | 創建成功";
   }
   removeUserData() {
     const userData = this.data[this.userId];
@@ -129,9 +126,9 @@ class UserDataManage {
       }
     });
     if (status == false) {
-      return "沒有這個單字";
+      return "❌ | 沒有這個單字";
     } else {
-      return "刪除成功";
+      return "✅ | 刪除成功";
     }
   }
   markUserWord() {
@@ -149,9 +146,9 @@ class UserDataManage {
     });
     if (status == true) {
       this.data[this.userId] = userData;
-      return "標記完成";
+      return "✅ | 標記完成";
     } else {
-      return "沒有標記這個單字";
+      return "❌ | 沒有這個單字";
     }
   }
   cancelMarkUserWord() {
@@ -170,9 +167,9 @@ class UserDataManage {
     });
     if (status == true) {
       this.data[this.userId] = userData;
-      return "取消標記完成";
+      return "✅ | 取消標記完成";
     } else {
-      return "沒有標記這個單字";
+      return "❌ | 沒有標記這個單字";
     }
   }
 }
@@ -213,7 +210,7 @@ class CleanWordList {
       cleanObj = { ...cleanObj, [item]: value };
     });
     this.data[this.userId] = cleanObj;
-    return "整理完成";
+    return "✅ | 整理完成";
   }
   toLower() {
     const userData = this.data[this.userId];
@@ -225,7 +222,7 @@ class CleanWordList {
       newObj[word] = userData[item];
     });
     this.data[this.userId] = newObj;
-    return "整理完成";
+    return "✅ | 整理完成";
   }
   toUppper() {
     const userData = this.data[this.userId];
@@ -237,7 +234,7 @@ class CleanWordList {
       newObj[word] = userData[item];
     });
     this.data[this.userId] = newObj;
-    return "整理完成";
+    return "✅ | 整理完成";
   }
 }
 class Handler {
@@ -299,7 +296,7 @@ class Handler {
       this.database.data = manage.data;
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleDisplayWord() {
@@ -310,7 +307,7 @@ class Handler {
       const displayText = manage.displayUserData();
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleMarkWord() {
@@ -327,7 +324,7 @@ class Handler {
       this.database.data = manage.data;
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleCancelMarkWord() {
@@ -344,7 +341,7 @@ class Handler {
       this.database.data = manage.data;
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleTydeUp() {
@@ -363,7 +360,7 @@ class Handler {
       this.database.data = tydeUp.data;
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleStartExam() {
@@ -377,14 +374,14 @@ class Handler {
         data
       );
       const qualify = exam.isStart();
-      if (qualify) return "有考試正在進行 請使用end指令結束考試";
+      if (qualify) return "❌ | 有考試正在進行 請使用end指令結束考試";
       exam.getRandomWord();
       exam.storeRandomWord();
       this.database.data = exam.data;
       const displayText = exam.displaySubjectWord();
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleEndExam() {
@@ -400,13 +397,13 @@ class Handler {
       );
       const qualify = exam.isStart();
       if (!qualify) {
-        return "目前沒有考試進行中";
+        return "❌ | 目前沒有考試進行中";
       } else {
         exam.shutDownExam();
-        return "考試結束";
+        return "✅ | 考試結束";
       }
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
   async handleAnswerExam() {
@@ -421,14 +418,14 @@ class Handler {
       );
       const qualify = exam.isStart();
       if (!qualify) {
-        return "目前沒有考試";
+        return "❌ | 目前沒有考試";
       }
 
       const displayText = exam.compareAnswer();
       exam.shutDownExam();
       return displayText;
     } else {
-      return "你還沒有建立資料";
+      return "❌ | 你還沒有建立資料";
     }
   }
 }
@@ -579,7 +576,7 @@ export const handleEnglish = async (
   }
   if (display != null) {
     const displayTextList = await handle.handleDisplayWord();
-    return displayTextList
+    return displayTextList;
   }
   if (clean != null) {
     displayText = await handle.handleTydeUp();

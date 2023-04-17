@@ -71,13 +71,13 @@ export const command = new SlashCommandBuilder()
   );
 
 export const action = async (ctx) => {
-  await ctx.deferReply()
+  await ctx.deferReply();
   let displayText = "";
   const userId = ctx.user.id;
   let chooseUserId, addWord, removeWord, markWord, cancelMarkWord;
   if (ctx.options.getSubcommand() === "display") {
     chooseUserId = ctx.options.getUser("user").id;
-    const page = 1
+    const page = 1;
     const displayTextList = await handleEnglish(
       null,
       null,
@@ -90,10 +90,10 @@ export const action = async (ctx) => {
       null,
       null
     );
-    displayTextList.map(async(item)=>{
-      await ctx.followUp(item)
-    })
-    return
+    displayTextList.map(async (item) => {
+      await ctx.followUp(item);
+    });
+    return;
   } else if (ctx.options.getSubcommand() === "manage") {
     addWord = ctx.options.getString("add");
     removeWord = ctx.options.getString("remove");
